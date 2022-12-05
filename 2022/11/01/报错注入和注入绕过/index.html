@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
     
-    <title>Hexo</title>
+    <title>报错注入和注入绕过 | Hexo</title>
 
     <meta name="description" content="Hexo">
     <meta name="keywords" content="">
@@ -15,21 +15,21 @@
 
     <meta property="og:locale" content="en" />
     <meta property="og:type" content="article" />
-    <meta property="og:title" content= "Hexo"  />
+    <meta property="og:title" content= "报错注入和注入绕过 | Hexo"  />
     <meta property="og:description" content= "Hexo" />
-    <meta property="og:url" content="https://luoyih.github.io/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/index.html" />
+    <meta property="og:url" content="https://luoyih.github.io/2022/11/01/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/index.html" />
     <meta property="og:site_name" content="" />
     <meta property="article:author" content="John Doe" />
     <meta property="article:publisher" content="" />
     <meta property="og:description" content="Hexo" />
-    <meta name="twitter:title" content="Hexo"/>
+    <meta name="twitter:title" content="报错注入和注入绕过 | Hexo"/>
     <meta name="twitter:description" content="Hexo"/>
     <script type="application/ld+json">
         {
             "description": "Hexo",
             "author": { "@type": "Person", "name": "John Doe" },
             "@type": "BlogPosting",
-            "url": "https://luoyih.github.io/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/index.html",
+            "url": "https://luoyih.github.io/2022/11/01/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/index.html",
             "publisher": {
             "@type": "Organization",
             "logo": {
@@ -38,11 +38,11 @@
             },
             "name": "John Doe"
             },
-            "headline": "Hexo",
-            "datePublished": "2022-12-05T02:14:36.394Z",
+            "headline": "报错注入和注入绕过 | Hexo",
+            "datePublished": "2022-11-01T13:03:23.000Z",
             "mainEntityOfPage": {
                 "@type": "WebPage",
-                "@id": "https://luoyih.github.io/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/index.html"
+                "@id": "https://luoyih.github.io/2022/11/01/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/index.html"
             },
             "@context": "http://schema.org"
         }
@@ -138,7 +138,7 @@
             <section class="inner">
                 <section class="inner-main">
                     <div class="post">
-    <article id="post-clba8qsn60001lonj16jya0g9" class="article article-type-post" itemscope
+    <article id="post-clba8yyb60000s0njda6g5pku" class="article article-type-post" itemscope
     itemprop="blogPost">
 
     <div class="article-inner">
@@ -150,15 +150,29 @@
         
 
         
+        <header class="article-header">
+            
+  
+    <h1 class="article-title" itemprop="name">
+      报错注入和注入绕过
+    </h1>
+  
+
+        </header>
+        
 
         <div class="article-more-info article-more-info-post hairline">
 
             <div class="article-date">
-  <time datetime="2022-12-05T02:14:36.394Z" itemprop="datePublished">2022-12-05</time>
+  <time datetime="2022-11-01T13:03:23.000Z" itemprop="datePublished">2022-11-01</time>
 </div>
 
             
 
+            
+            <div class="article-tag">
+                <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag">sql注入</a></li></ul>
+            </div>
             
 
             
@@ -166,7 +180,7 @@
         </div>
 
         <div class="article-entry post-inner-html hairline" itemprop="articleBody">
-            <h1 id="报错注入和注入绕过"><a href="#报错注入和注入绕过" class="headerlink" title="报错注入和注入绕过"></a>报错注入和注入绕过</h1><p>mysql中的extractvalue函数</p>
+            <h3 id="0x01-原理"><a href="#0x01-原理" class="headerlink" title="0x01 原理"></a>0x01 原理</h3><p>mysql中的extractvalue函数</p>
 <p>原理：extractvalue是对对XML文档进行查询的函数，参数2是查询得到div标签下的值为value，如果查询标签名格式不对就会报错</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">select extractvalue(&#x27;&lt;div&gt;value&lt;/div&gt;&#x27;,&#x27;div&#x27;); </span><br><span class="line"></span><br><span class="line">+----------------------------------------+</span><br><span class="line">| extractvalue(&#x27;&lt;div&gt;value&lt;/div&gt;&#x27;,&#x27;div&#x27;) |</span><br><span class="line">+----------------------------------------+</span><br><span class="line">| value                                  |</span><br><span class="line">+----------------------------------------+</span><br></pre></td></tr></table></figure>
 
@@ -185,7 +199,7 @@
 
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and updatexml(&#x27;div&#x27;,concat(&#x27;~&#x27;,database()),&#x27;value&#x27;);</span><br></pre></td></tr></table></figure>
 
-<h2 id="注入绕过"><a href="#注入绕过" class="headerlink" title="注入绕过"></a>注入绕过</h2><p>1 大小写绕过</p>
+<h3 id="0x02-注入绕过"><a href="#0x02-注入绕过" class="headerlink" title="0x02 注入绕过"></a>0x02 注入绕过</h3><p>1 大小写绕过</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">比如 and 和AND 但没有过滤And</span><br><span class="line">再比如 过滤了select SELECT 但是没有过滤SelEct</span><br></pre></td></tr></table></figure>
 
 <p>2 双写绕过</p>
@@ -221,11 +235,15 @@
     
 <nav class="article-nav">
   
-  
-    <a href="/2022/12/02/CVE-2021-21972%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-caption">上一篇</div>
-      <div class="article-nav-title">CVE-2021-21972漏洞复现</div>
+    <a href="/2022/12/02/CVE-2021-21972%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <div class="article-nav-caption">下一篇</div>
+      <div class="article-nav-title">
+        
+          CVE-2021-21972漏洞复现
+        
+      </div>
     </a>
+  
   
 </nav>
 
@@ -233,15 +251,15 @@
     <section class="share">
         <div class="share-title">分享</div>
         <a class="share-item" target="_blank"
-            href="https://twitter.com/share?text= - Hexo&url=https%3A%2F%2Fluoyih.github.io%2F2022%2F12%2F05%2F%25E6%258A%25A5%25E9%2594%2599%25E6%25B3%25A8%25E5%2585%25A5%25E5%2592%258C%25E6%25B3%25A8%25E5%2585%25A5%25E7%25BB%2595%25E8%25BF%2587%2F">
+            href="https://twitter.com/share?text=报错注入和注入绕过 - Hexo&url=https%3A%2F%2Fluoyih.github.io%2F2022%2F11%2F01%2F%25E6%258A%25A5%25E9%2594%2599%25E6%25B3%25A8%25E5%2585%25A5%25E5%2592%258C%25E6%25B3%25A8%25E5%2585%25A5%25E7%25BB%2595%25E8%25BF%2587%2F">
             <ion-icon name="logo-twitter"></ion-icon>
         </a>
         <a class="share-item" target="_blank"
-            href="https://www.facebook.com/sharer.php?title= - Hexo&u=https%3A%2F%2Fluoyih.github.io%2F2022%2F12%2F05%2F%25E6%258A%25A5%25E9%2594%2599%25E6%25B3%25A8%25E5%2585%25A5%25E5%2592%258C%25E6%25B3%25A8%25E5%2585%25A5%25E7%25BB%2595%25E8%25BF%2587%2F">
+            href="https://www.facebook.com/sharer.php?title=报错注入和注入绕过 - Hexo&u=https%3A%2F%2Fluoyih.github.io%2F2022%2F11%2F01%2F%25E6%258A%25A5%25E9%2594%2599%25E6%25B3%25A8%25E5%2585%25A5%25E5%2592%258C%25E6%25B3%25A8%25E5%2585%25A5%25E7%25BB%2595%25E8%25BF%2587%2F">
             <ion-icon name="logo-facebook"></ion-icon>
         </a>
         <!-- <a class="share-item" target="_blank"
-            href="https://service.weibo.com/share/share.php?title= - Hexo&url=https://luoyih.github.io/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/&pic=">
+            href="https://service.weibo.com/share/share.php?title=报错注入和注入绕过 - Hexo&url=https://luoyih.github.io/2022/11/01/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/&pic=">
             <div class="n-icon n-icon-weibo"></div>
         </a> -->
     </section>
@@ -289,7 +307,7 @@
   <div class="widget-wrap widget-tags">
     <div class="widget-title"><span>Tags</span></div>
     <div class="widget-inner">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag">漏洞复现</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag">sql注入</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/" rel="tag">漏洞复现</a></li></ul>
     </div>
   </div>
 
@@ -302,11 +320,11 @@
       <ul>
         
           <li>
-            <a href="/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/">(no title)</a>
+            <a href="/2022/12/02/CVE-2021-21972%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/">CVE-2021-21972漏洞复现</a>
           </li>
         
           <li>
-            <a href="/2022/12/02/CVE-2021-21972%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/">CVE-2021-21972漏洞复现</a>
+            <a href="/2022/11/01/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/">报错注入和注入绕过</a>
           </li>
         
       </ul>
